@@ -11,24 +11,25 @@ rm(list=ls())
 ##
 ## The Long Way ...
 ##
-df1 <- read_csv("./bike_data/t01.csv")
-df2 <- read_csv("./bike_data/t02.csv")
-df3 <- read_csv("./bike_data/t03.csv")
-df4 <- read_csv("./bike_data/t04.csv")
-df5 <- read_csv("./bike_data/t05.csv")
-df6 <- read_csv("./bike_data/t06.csv")
-df7 <- read_csv("./bike_data/t07.csv")
-df8 <- read_csv("./bike_data/t08.csv")
-df9 <- read_csv("./bike_data/t09.csv")
-df10 <- read_csv("./bike_data/t10.csv")
-df11 <- read_csv("./bike_data/t11.csv")
-df12 <- read_csv("./bike_data/t12.csv")
+df01 <- read_csv("./bike_data/t01.csv") %>% select(-start_station_id,-end_station_id)
+df02 <- read_csv("./bike_data/t02.csv") %>% select(-start_station_id, -end_station_id)
+# df03 <- read.csv("./bike_data/t03.csv")
+df04 <- read_csv("./bike_data/t04.csv") %>% select(-start_station_id,-end_station_id)
+df05 <- read_csv("./bike_data/t05.csv") %>% select(-start_station_id,-end_station_id)
+df06 <- read_csv("./bike_data/t06.csv") %>% select(-start_station_id, -end_station_id)
+df07 <- read_csv("./bike_data/t07.csv") %>% select(-start_station_id, -end_station_id)
+df08 <- read_csv("./bike_data/t08.csv") %>% select(-start_station_id, -end_station_id)
+df09 <- read_csv("./bike_data/t09.csv") %>% select(-start_station_id, -end_station_id)
+df10 <- read_csv("./bike_data/t10.csv") %>% select(-start_station_id, -end_station_id)
+df11 <- read_csv("./bike_data/t11.csv") %>% select(-start_station_id, -end_station_id)
+df12 <- read_csv("./bike_data/t12.csv") %>% select(-start_station_id, -end_station_id)
+#
+
 ##
-## Combine 12 data.frames into One (1) data.frame
-##
-bike_rides <- rbind(df1,df2,df3,df4,df5,df6,df7,df8,df9,df10,df11,df12)
-bike_rides <- janitor::remove_empty(bike_rides,which = c("cols"))
-bike_rides <- janitor::remove_empty(bike_rides,which = c("rows"))
+bike_rides <- bind_rows(df01,df02,df04,df05,df06,df07,df08,df09,df10,df11,df12)
+bike_rides <- bike_rides %>%   filter(!is.na(start_station_name))
+bike_rides <- janitor::remove_empty(bike_rides,which = c("cols","rows"))
+
 ##
 ## Convert Data/Time stamp to Date/Time ...
 ##
@@ -55,7 +56,7 @@ bikerides1$Minutes <- round(bikerides1$Minutes)
 ###
 ## Summary by Minutes
 
-bikesrides2 <- bikerides1 %>% group_by(Ymd) %>%
+bikesrides2 <- bikerides1 %>% group_by(start_date) %>%
   summarise(
     Mins = sum(Minutes),
     Mean = mean(Minutes),
@@ -67,7 +68,7 @@ bikesrides2 <- bikerides1 %>% group_by(Ymd) %>%
 
 ### Create summary data frame
 
-bikesrides3 <- bikerides1 %>% group_by(Ymd,start_hour) %>%
+bikesrides3 <- bikerides1 %>% group_by(start_date,start_hour) %>%
                 summarise(
                   Mins = sum(Minutes),
                   Mean = mean(Minutes),
@@ -99,7 +100,7 @@ bikesrides3 %>% ggplot(aes(x=start_hour,y=Count)) +
 
 ## Plots by Bike Type and Day 
 
-bikesrides4 <- bikerides1 %>% group_by(Ymd,rideable_type) %>%
+bikesrides4 <- bikerides1 %>% group_by(start_date,rideable_type) %>%
   summarise(
     Mins = sum(Minutes),
     Mean = mean(Minutes),
@@ -111,3 +112,8 @@ bikesrides4 <- bikerides1 %>% group_by(Ymd,rideable_type) %>%
 
 bikesrides4 %>% ggplot(aes(x=Ymd,y=Count)) +
   geom_line() + facet_wrap(~rideable_type)
+
+
+ 
+ggplot() + geom_line(aes(x=date,y=count)) +
+  scale_y_continuous(labels = comma)
